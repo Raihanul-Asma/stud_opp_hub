@@ -22,6 +22,7 @@ export interface Opportunity {
   deadline: string;
   applyLink: string;
   description?: string;
+  skills?: string[];
 }
 
 export interface Recommendation extends Opportunity {

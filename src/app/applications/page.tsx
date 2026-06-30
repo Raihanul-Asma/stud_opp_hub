@@ -11,9 +11,12 @@ import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Clock, XCircle, Info } from 'lucide-react';
 import api from '@/services/api';
 import { Application } from '@/types';
+import ApplicationDetailsDialog from "@/components/ApplicationDetailsDialog";
 
 export default function ApplicationsPage() {
   const [applications, setApplications] = useState<Application[]>([]);
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+const [dialogOpen, setDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -99,7 +102,15 @@ export default function ApplicationsPage() {
                            </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <button className="text-sm text-indigo-600 hover:underline">View details</button>
+                         <button
+  className="text-sm text-indigo-600 hover:underline"
+  onClick={() => {
+    setSelectedApplication(app);
+    setDialogOpen(true);
+  }}
+>
+  View details
+</button>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -122,6 +133,11 @@ export default function ApplicationsPage() {
           )}
         </div>
       </div>
+      <ApplicationDetailsDialog
+    open={dialogOpen}
+    onOpenChange={setDialogOpen}
+    application={selectedApplication}
+/>
     </MainLayout>
   );
 }

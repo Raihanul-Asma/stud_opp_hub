@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  LayoutDashboard, 
-  Briefcase, 
-  Zap, 
-  FileCheck, 
-  UserCircle, 
+import {
+  LayoutDashboard,
+  Briefcase,
+  Zap,
+  FileCheck,
+  UserCircle,
+  Heart,
   LogOut,
   Menu,
   ChevronLeft
@@ -22,6 +23,9 @@ const navItems = [
   { href: '/opportunities', label: 'Opportunities', icon: Briefcase },
   { href: '/recommendations', label: 'Recommendations', icon: Zap },
   { href: '/applications', label: 'Applications', icon: FileCheck },
+
+  { href: '/saved', label: 'Saved', icon: Heart },
+
   { href: '/profile', label: 'Profile', icon: UserCircle },
 ];
 

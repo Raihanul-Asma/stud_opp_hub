@@ -7,12 +7,24 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Zap, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Link from "next/link";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { useState } from "react";
 
 interface RecommendationCardProps {
   recommendation: Recommendation;
 }
 
 export const RecommendationCard = ({ recommendation }: RecommendationCardProps) => {
+  const [open, setOpen] = useState(false);
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -41,12 +53,94 @@ export const RecommendationCard = ({ recommendation }: RecommendationCardProps) 
         </CardContent>
         <CardFooter className="bg-muted/30 pt-4 flex justify-between items-center">
           <span className="text-xs text-muted-foreground">{recommendation.type}</span>
-          <Button variant="link" className="p-0 text-indigo-600 flex items-center">
-            View details
-            <ArrowRight className="ml-1 h-3 w-3" />
-          </Button>
+          <Link href={`/opportunities/${recommendation.id}`}>
+  <Button variant="link" className="p-0 text-indigo-600 flex items-center">
+    View Details
+    <ArrowRight className="ml-1 h-3 w-3" />
+  </Button>
+</Link>
         </CardFooter>
       </Card>
+      <Dialog open={open} onOpenChange={setOpen}>
+  <DialogContent className="max-w-xl">
+    <DialogHeader>
+      <DialogTitle>{recommendation.title}</DialogTitle>
+
+      <DialogDescription>
+        {recommendation.organization}
+      </DialogDescription>
+    </DialogHeader>
+
+    <div className="space-y-4">
+
+      <div className="flex justify-between">
+        <span className="font-medium">Match Score</span>
+        <Badge className="bg-indigo-600">
+          {recommendation.matchScore}%
+        </Badge>
+      </div>
+
+      <div className="flex justify-between">
+        <span className="font-medium">Type</span>
+        <span>{recommendation.type}</span>
+      </div>
+
+      {recommendation.deadline && (
+        <div className="flex justify-between">
+          <span className="font-medium">Deadline</span>
+          <span>{recommendation.deadline}</span>
+        </div>
+      )}
+
+      {recommendation.description && (
+        <div>
+          <p className="font-medium mb-2">
+            Description
+          </p>
+
+          <p className="text-muted-foreground">
+            {recommendation.description}
+          </p>
+        </div>
+      )}
+
+      {recommendation.skills && recommendation.skills.length > 0 && (
+        <div>
+          <p className="font-medium mb-2">
+            Required Skills
+          </p>
+
+          <div className="flex flex-wrap gap-2">
+            {recommendation.skills.map((skill) => (
+              <Badge
+                key={skill}
+                variant="secondary"
+              >
+                {skill}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+    </div>
+
+    <DialogFooter>
+
+      <Button
+        className="bg-indigo-600 hover:bg-indigo-700"
+        onClick={() => {
+          if (recommendation.applyLink) {
+            window.open(recommendation.applyLink, "_blank");
+          }
+        }}
+      >
+        Apply Now
+      </Button>
+
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
     </motion.div>
   );
 };

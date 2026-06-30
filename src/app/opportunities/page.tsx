@@ -11,6 +11,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '@/services/api';
 import { Opportunity } from '@/types';
+import { toast } from "sonner";
 
 export default function OpportunitiesPage() {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
@@ -18,7 +19,7 @@ export default function OpportunitiesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState('All');
-
+const [appliedIds, setAppliedIds] = useState<number[]>([]);
   useEffect(() => {
     const fetchOpportunities = async () => {
       try {
@@ -85,6 +86,27 @@ export default function OpportunitiesPage() {
     setFilteredOpps(result);
   }, [search, activeTab, opportunities]);
 
+const handleApply = async (id: number) => {
+  try {
+    await api.post("/applications", {
+      opportunityId: id,
+    });
+
+    toast.success("Application submitted successfully!", {
+      description: "You can track it from the Applications page.",
+    });
+
+    setAppliedIds((prev) => [...prev, id]);
+
+  } catch (error) {
+    console.error(error);
+
+    toast.error("Application failed", {
+      description: "Please try again.",
+    });
+  }
+};
+
   return (
     <MainLayout>
       <div className="space-y-8">
@@ -125,8 +147,13 @@ export default function OpportunitiesPage() {
         ) : filteredOpps.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredOpps.map((opp) => (
-              <OpportunityCard key={opp.id} opportunity={opp} />
-            ))}
+  <OpportunityCard
+  key={opp.id}
+  opportunity={opp}
+  onApply={handleApply}
+  applied={appliedIds.includes(opp.id)}
+/>
+))}
           </div>
         ) : (
           <EmptyState 

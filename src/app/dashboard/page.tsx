@@ -11,22 +11,32 @@ import { useAuth } from '@/context/AuthContext';
 import { Opportunity, Recommendation } from '@/types';
 import api from '@/services/api';
 import { motion } from 'framer-motion';
+import { toast } from "sonner";
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [stats, setStats] = useState({
+  totalOpportunities: 0,
+  totalRecommendations: 0,
+  totalApplications: 0,
+  profileStrength: 0,
+});
   const [isLoading, setIsLoading] = useState(true);
+  const [appliedIds, setAppliedIds] = useState<number[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [oppsRes, recsRes] = await Promise.all([
-          api.get('/opportunities?limit=3'),
-          api.get('/recommendations?limit=2')
-        ]);
+        const [oppsRes, recsRes, statsRes] = await Promise.all([
+  api.get('/opportunities?limit=3'),
+  api.get('/recommendations?limit=2'),
+  api.get('/dashboard/stats')
+]);
         setOpportunities(oppsRes.data);
         setRecommendations(recsRes.data);
+        setStats(statsRes.data);
       } catch (error: any) {
         console.error('Error fetching dashboard data', error);
         setOpportunities([
@@ -42,6 +52,27 @@ export default function DashboardPage() {
 
     fetchData();
   }, []);
+
+  const handleApply = async (id: number) => {
+  try {
+    await api.post("/applications", {
+      opportunityId: id,
+    });
+
+    toast.success("Application submitted successfully!", {
+      description: "You can track it from the Applications page.",
+    });
+
+    setAppliedIds((prev) => [...prev, id]);
+
+  } catch (error) {
+    console.error(error);
+
+    toast.error("Application failed", {
+      description: "Please try again.",
+    });
+  }
+};
 
   return (
     <MainLayout>
@@ -59,7 +90,7 @@ export default function DashboardPage() {
           </p>
         </header>
 
-        <DashboardStats />
+        <DashboardStats stats={stats} />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
@@ -73,7 +104,12 @@ export default function DashboardPage() {
             ) : opportunities.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {opportunities.map((opp) => (
-                  <OpportunityCard key={opp.id} opportunity={opp} />
+                  <OpportunityCard
+  key={opp.id}
+  opportunity={opp}
+  onApply={handleApply}
+  applied={appliedIds.includes(opp.id)}
+/>
                 ))}
               </div>
             ) : (
